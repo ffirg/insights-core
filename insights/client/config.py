@@ -435,6 +435,18 @@ class InsightsConfig(object):
                                  for k, v in os.environ.items()
                                  if k.upper().startswith("INSIGHTS_") and
                                  k.upper() not in ignore)
+
+        for k in ['retries', 'cmd_timeout', 'http_timeout']:
+            if k in insights_env_opts:
+                v = insights_env_opts[k]
+                try:
+                    if k == 'http_timeout':
+                        insights_env_opts[k] = float(v)
+                    else:
+                        insights_env_opts[k] = int(v)
+                except ValueError:
+                    raise ValueError(
+                        'ERROR: Invalid value specified for {0}: {1}.'.format(k, v))
         self._update_dict(insights_env_opts)
 
     def load_command_line(self, conf_only=False):
@@ -493,7 +505,7 @@ class InsightsConfig(object):
         d = dict(parsedconfig.items(constants.app_name))
         for key in d:
             try:
-                if key == 'retries':
+                if key == 'retries' or key =='cmd_timeout':
                     d[key] = parsedconfig.getint(constants.app_name, key)
                 if key == 'http_timeout':
                     d[key] = parsedconfig.getfloat(constants.app_name, key)
